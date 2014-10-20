@@ -1,13 +1,15 @@
 #!/bin/ash
-YourNetworkName=garyclayburg.com
-ForwardMasterFile=garyclayburg.com
+YourNetworkName=home.lan
+ForwardMasterFile=home.lan
 ReverseMasterFile=1.168.192.in-addr.arpa
 #todo automagically determine filenames for forward and reverse zones, so that this file does not need to be edited
 # to work in a default config
+
 #If you define StaticIpStart and StaticIpEnd, then and static IP addresses defined in DNS will be preserved
 #If StaticIpStart and StaticIpEnd is not defined, then all IP addresses are assumed to be originating from DHCP assignment
+#Here we assume DHCP is configured to assign address starting at 192.168.1.100
 StaticIpStart=1
-StaticIpEnd=109
+StaticIpEnd=99
 
 
 # Note that backup path is also used as a temp folder.
