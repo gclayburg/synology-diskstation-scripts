@@ -30,6 +30,7 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 ####Deployment
 
 You will need to:
+
 1. Copy this script into the "admin" account
 2. Edit this script to match your settings
 3. Setup a recurring task in Synology DSM to run the script at regular intervals
