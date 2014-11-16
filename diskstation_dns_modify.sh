@@ -102,7 +102,7 @@ printDhcpAsRecords () {
 		BEGIN {
 		   # Set awks field separator and network adapter names.
 		   FS="[\t =,]";
-		   adapters=",eth0,eth1,eth2,eth3,eth4,eth5,eth6,eth7,bond0,bond1,bond2,bond3,";
+		   adapters=",eth0,eth1,eth2,eth3,eth4,eth5,eth6,eth7,bond0,bond1,bond2,bond3,,";
 		}
 		{IP=""} # clear out variables
 		$1 ~ /^[0-9]/ {IP=$3; NAME=$4; RENEW=86400} # Leases start with numbers
