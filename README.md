@@ -5,8 +5,10 @@ Scripts that help with Synology Diskstation maintenance
 
 
 
-Why do I need this?
-tl;dr version:  You are running Synology Diskstation DNS and DHCP services and you want dynamic DHCP reservations to update DNS immediately.
+##Why do I need this?
+
+#tl;dr version:  
+You are running Synology Diskstation DNS and DHCP services and you want dynamic DHCP reservations to update DNS immediately.
 
 Synology Diskstation has an embedded DNS server that can be enabled for your network.  This does the standard thing of resolving hostnames to IP addresses.  So, lets say you have a VMware ESXi server on your local network. You arbitrarily name it esxi1.homelan.net.   The DNS server is where you map the name esxi1.homelan.net to the static IP address of 192.168.1.10.  From then on, all other devices in your network can access this server using the name esxi.homelan.net.  Only the DNS server needs to remember the IP address.  Nothing new here.
 
