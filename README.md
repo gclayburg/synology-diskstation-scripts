@@ -28,7 +28,7 @@ This script can be used to configure a synology diskstation to automatically upd
 This script must be edited to match your network.  See the original documentation for installation instructions and/or review the script comments to see what it does.
 
 
-The script originated here:
+The script originated from Tim Smith here:
 
 http://forum.synology.com/enu/viewtopic.php?f=233&t=88517
 
