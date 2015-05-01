@@ -27,6 +27,9 @@ DHCPStatic=/etc/dhcpd/dhcpd-static-static.conf
 # this file may not exist if you haven't configured anything in the dhcp static reservations list (mac addr -> ip addr)
 [ -f $DHCPStatic ] && DHCPAssigned="$DHCPAssigned $DHCPStatic"
 
+DHCPLeaseFile=/etc/dhcpd/dhcpd.conf.leases
+[ -f $DHCPLeaseFile ] && DHCPAssigned="$DHCPAssigned $DHCPLeaseFile"
+
 ##########################################################################
 # Verify files exist and appropriate rights are granted
 # Fail if environment is not set up correctly.
@@ -102,7 +105,7 @@ printDhcpAsRecords () {
 		BEGIN {
 		   # Set awks field separator and network adapter names.
 		   FS="[\t =,]";
-		   adapters=",eth0,eth1,eth2,eth3,eth4,eth5,eth6,eth7,bond0,bond1,bond2,bond3,,";
+		   adapters=",eth0,eth1,eth2,eth3,eth4,eth5,eth6,eth7,bond0,bond1,bond2,bond3,,*,";
 		}
 		{IP=""} # clear out variables
 		$1 ~ /^[0-9]/ {IP=$3; NAME=$4; RENEW=86400} # Leases start with numbers
