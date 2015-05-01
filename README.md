@@ -47,6 +47,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2014-11-23  A new script is available to update DNS within 10 seconds of a new DHCP reservation
 
+2015-05-01  DHCP leases in /etc/dhcpd/dhcpd.conf.leases are now supported.  
+
 ####Deployment
 
 You will need to:
