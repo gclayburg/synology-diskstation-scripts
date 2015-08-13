@@ -6,7 +6,7 @@ while true; do
    if [[ "$ATIME" != "$LTIME" ]]; then
      date
      echo "dhcp leases changed - reloading DNS"
-     /volume1/homes/admin/diskstation_dns_modify.sh
+     /var/services/homes/admin/diskstation_dns_modify.sh
      LTIME=$ATIME
    fi
    sleep 5

@@ -1,16 +1,22 @@
 #!/bin/ash
+# These settings should be edited to match the settings of your existing DNS server configurtion on your synology server (Main Menu -> DNS Server -> Zones)
+#YourNetworkName -> Domain name column
+#ForwardMasterFile -> Zone ID column
+#ReverseMasterFile -> Zone ID column
 YourNetworkName=home.lan
 ForwardMasterFile=home.lan
 ReverseMasterFile=1.168.192.in-addr.arpa
 #todo automagically determine filenames for forward and reverse zones, so that this file does not need to be edited
 # to work in a default config
 
-#If you define StaticIpStart and StaticIpEnd, then and static IP addresses defined in DNS will be preserved
+#If you define StaticIpStart and StaticIpEnd, then static IP addresses defined in DNS will be preserved
 #If StaticIpStart and StaticIpEnd is not defined, then all IP addresses are assumed to be originating from DHCP assignment
-#Here we assume DHCP is configured to assign address starting at 192.168.1.100
+#Here we assume DHCP is configured to assign address starting at 192.168.1.100, and any IP addresses in the range of 192.168.1.1 - 192.168.1.99 are statically defined
+# within the synology DSM UI (Main Menu -> DNS Server -> Zones)
 StaticIpStart=1
 StaticIpEnd=99
 
+#Note: the remainder of this script should not need to be modified
 
 # Note that backup path is also used as a temp folder.
 BackupPath=/var/services/homes/admin/scripts/dns_backups
