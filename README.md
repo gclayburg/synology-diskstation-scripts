@@ -11,11 +11,11 @@ Scripts that help with Synology Diskstation maintenance
 You are running Synology Diskstation DNS and DHCP services and you want dynamic DHCP reservations to update DNS immediately.
 
 #Background
-Synology Diskstation has an embedded DNS server that can be enabled for your network.  This does the standard thing of resolving hostnames to IP addresses.  So, lets say you have a VMware ESXi server on your local network. You arbitrarily name it esxi1.homelan.net.   The DNS server is where you map the name esxi1.homelan.net to the static IP address of 192.168.1.10.  From then on, all other devices in your network can access this server using the name esxi.homelan.net.  Only the DNS server needs to remember the IP address.  Nothing new here.
+Synology Diskstation has an embedded DNS server that can be enabled for your network.  This does the standard thing of resolving hostnames to IP addresses.  So, lets say you have a VMware ESXi server on your local network. You arbitrarily name it `esxi1.homelan.net`.   The DNS server is where you map the name `esxi1.homelan.net` to the static IP address of `192.168.1.10`.  From then on, all other devices in your network can access this server using the name `esxi.homelan.net`.  Only the DNS server needs to remember the IP address.  Nothing new here.
 
-Synology diskstation also has a DHCP server that you can use to dynamically assign IP addreses to hosts on your network.  This means you can power up a new laptop,ipad, or guest VM on your network and it will be able to use the network without configuring anything.  Under the covers, they use DHCP to get an available IP address from your DHCP server.
+Synology diskstation also has a DHCP server that you can use to dynamically assign IP addreses to hosts on your network.  This means you can power up a new laptop, ipad, or guest VM on your network and it will be able to use the network without configuring anything.  Under the covers, they use DHCP to get an available IP address from your DHCP server.
 
-Synology can host both of these services and they both work well by themselves.  However, they don't talk to each other.  They both deal with IP addresses and hostnames, yet they operate independently.  For example, when you power on your laptop, the laptop will essentially say something like this:  "Hello, my hostname is garylaptop and I need an available IP address".  The DHCP server will gladly assign an unused IP address, but that is where things end.  The DNS server knows nothing about this hostname to IP address assignment.  This means that no other host on the network will be able to refer to the laptop if they only know the hostname.  You can't, for example, do something like "ssh garylaptop" from another host on your network.
+Synology can host both of these services and they both work well by themselves.  However, they don't talk to each other.  They both deal with IP addresses and hostnames, yet they operate independently.  For example, when you power on your laptop, the laptop will essentially say something like this:  "Hello, my hostname is `garylaptop` and I need an available IP address".  The DHCP server will gladly assign an unused IP address, but that is where things end.  The DNS server knows nothing about this hostname to IP address assignment.  This means that no other host on the network will be able to refer to the laptop if they only know the hostname.  You can't, for example, do something like `ssh garylaptop` from another host on your network.
 
 For the average consumer client device like a laptop or ipad, this is normally fine.  It is unlikely that other devices on the network want to communicate with the laptop using a hostname.
 
@@ -40,13 +40,13 @@ https://www.youtube.com/watch?v=T22xytAWq3A&list=UUp8GcSEeUnLY8d6RAT6Y3Mg
 
 2014-10-20  Modified to honor DNS static IP addresses
 
-For example, lets say you have configured DNS in synology DSM.  You are manually assigning static IP addresses using the DSM GUI in the range of 192.168.1.1 - 192.168.1.99.  You have also configured Synology DHCP to serve dynamic IP addresses starting at 192.168.1.100.  This is all works fine.  However, without this script here, Synology will not update DNS records when the DHCP server assigns a new dynamic IP address.  This script does that and it now does it without overwriting static DNS entries in the range of 192.168.1.1 - 192.168.1.99
+For example, lets say you have configured DNS in synology DSM.  You are manually assigning static IP addresses using the DSM GUI in the range of `192.168.1.1` - `192.168.1.99`.  You have also configured Synology DHCP to serve dynamic IP addresses starting at `192.168.1.100`.  This is all works fine.  However, without this script here, Synology will not update DNS records when the DHCP server assigns a new dynamic IP address.  This script does that and it now does it without overwriting static DNS entries in the range of `192.168.1.1` - `192.168.1.99`.
 
 2014-11-10  Fixed a bug where DNS update would fail if DHCP client does not specify a hostname
 
 2014-11-23  A new script is available to update DNS within 10 seconds of a new DHCP reservation
 
-2015-05-01  DHCP leases in /etc/dhcpd/dhcpd.conf.leases are now supported.  
+2015-05-01  DHCP leases in `/etc/dhcpd/dhcpd.conf.leases` are now supported.  
 
 2015-08-13  A new script is available to start this service each time the synology diskstation boots up.  You no longer need to have any Task Scheduler items when using this script 
 
@@ -61,7 +61,7 @@ You will need to:
 
 1. Install two scripts into the "admin" account.  These scripts should be owned by root and executable:
 
-    ```sh
+    ```
     DiskStation> ls -l /var/services/homes/admin/*sh
     -rwxr-xr-x    1 root     root          7798 May  1 15:07 /var/services/homes/admin/diskstation_dns_modify.sh
     -rwxr-xr-x    1 root     root           283 Nov 21  2014 /var/services/homes/admin/poll-dhcp-changes.sh
@@ -70,27 +70,28 @@ You will need to:
 2. The `diskstation_dns_modify.sh` script needs to be modified to match your network.  See the comments in the script for details.
 3. Install the start script into `/usr/local/etc/rc.d/ directory`.  It also should be owed by root and executable.
 
-```sh
+```
 DiskStation> ls -l /usr/local/etc/rc.d
 -rwxr-xr-x    1 root     root           693 Aug  6 13:40 S99pollDHCP.sh
 ```
 
-This S99pollDHCP.sh script will be called during the Synology DSM boot process the next time the server is restarted.  This script can also be started manually:
+This `S99pollDHCP.sh` script will be called during the Synology DSM boot process the next time the server is restarted.  This script can also be started manually:
 
-```sh
+```
 DiskStation> /usr/local/etc/rc.d/S99pollDHCP.sh start
 ```
 
 and stopped:
 
-```sh
+```
 DiskStation> /usr/local/etc/rc.d/S99pollDHCP.sh stop
 ```
 
-__Warning__ If you manually start the server manually like this, this script will only run while you are logged on to the ssh console.  The script will stop once you log off.  DNS will not be updated from new reservations until this script is started again.  To run the script permanently, you will need to reboot your synology diskstation.   This is because there is no "nohup" command in the standard Synology DSM.  
+__Warning__ If you manually start the server manually like this, this script will only run while you are logged on to the ssh console.  The script will stop once you log off.  DNS will not be updated from new reservations until this script is started again.  To run the script permanently, you will need to reboot your Synology Diskstation.   This is because there is no "nohup" command in the standard Synology DSM.  
+
 
 ####Starting via Task Scheduler
-If it is inconvenient to restart your Synology server, there is an alternate way to start this service using the DSM Task Scheduler (Main Menu -> Control Panel -> Task Scheduler).  The script will run indefinitely when started this way.  This is basically a way to simulate "nohup" without going down the path of installing extra software on Synology DSM just to avoid having to do a reboot the first time the software is installed.
+If it is inconvenient to restart your Synology Diskstation, there is an alternate way to start this service using the DSM Task Scheduler (Main Menu -> Control Panel -> Task Scheduler).  The script will run indefinitely when started this way.  This is basically a way to simulate "nohup" without going down the path of installing extra software on Synology DSM just to avoid having to do a reboot the first time the software is installed.
 
 1.  Open Task Scheduler
 2.  Click Create -> User-defined script
