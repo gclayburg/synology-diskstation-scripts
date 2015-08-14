@@ -49,7 +49,9 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 2015-05-01  DHCP leases in /etc/dhcpd/dhcpd.conf.leases are now supported.  
 
 2015-08-13  A new script is available to start this service each time the synology diskstation boots up.  You no longer need to have any Task Scheduler items when using this script 
+
 2015-08-13  Updated documentation
+
 2015-08-13  Updated file path in scripts to match a more generic location of the admin account directory.
 
 
@@ -58,25 +60,30 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 You will need to:
 
 1. Install two scripts into the "admin" account.  These scripts should be owned by root and executable:
-```
-DiskStation> ls -l /var/services/homes/admin/*sh
--rwxr-xr-x    1 root     root          7798 May  1 15:07 /var/services/homes/admin/diskstation_dns_modify.sh
--rwxr-xr-x    1 root     root           283 Nov 21  2014 /var/services/homes/admin/poll-dhcp-changes.sh
-```
-2. The diskstation_dns_modify.sh script needs to be modified to match your network.  See the comments in the script for details.
-3. Install the start script into /usr/local/etc/rc.d/ directory.  It also should be owed by root and executable.
 
-```
+    ```sh
+    DiskStation> ls -l /var/services/homes/admin/*sh
+    -rwxr-xr-x    1 root     root          7798 May  1 15:07 /var/services/homes/admin/diskstation_dns_modify.sh
+    -rwxr-xr-x    1 root     root           283 Nov 21  2014 /var/services/homes/admin/poll-dhcp-changes.sh
+    ```
+
+2. The `diskstation_dns_modify.sh` script needs to be modified to match your network.  See the comments in the script for details.
+3. Install the start script into `/usr/local/etc/rc.d/ directory`.  It also should be owed by root and executable.
+
+```sh
 DiskStation> ls -l /usr/local/etc/rc.d
 -rwxr-xr-x    1 root     root           693 Aug  6 13:40 S99pollDHCP.sh
 ```
 
 This S99pollDHCP.sh script will be called during the Synology DSM boot process the next time the server is restarted.  This script can also be started manually:
-```
+
+```sh
 DiskStation> /usr/local/etc/rc.d/S99pollDHCP.sh start
 ```
+
 and stopped:
-```
+
+```sh
 DiskStation> /usr/local/etc/rc.d/S99pollDHCP.sh stop
 ```
 
@@ -89,16 +96,17 @@ If it is inconvenient to restart your Synology server, there is an alternate way
 2.  Click Create -> User-defined script
 3.  Key in a name for the task.  Anything is fine here.
 4.  Uncheck the "Enabled" button.  You don't want this task to start this service over and over on some schedule.  We are just going to use the task scheduler to start our service one time.
-5.  Key in this in the User-defined script area:
+5.  Key in this in the User-defined script area and click OK:
+
+```sh
+        /usr/local/etc/rc.d/S99pollDHCP.sh >>/var/services/homes/admin/startS99pollDHCP.log
 ```
-/usr/local/etc/rc.d/S99pollDHCP.sh >>/var/services/homes/admin/startS99pollDHCP.log
-```
-6. Click OK
-7. Select the script from the list and Click run.  Boom.  Done.
+
+You can now select the script from the list and Click run.  Boom.  Done.
 
 ####Troubleshooting
 
-Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at /var/services/homes/logs/dhcp-dns.log.  
+Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at `/var/services/homes/logs/dhcp-dns.log`.  
 
 You can also view the DNS log from the normal DSM UI.  This can be useful if there is some sort of conflict between static DNS entries that you defined in the DSM DNS UI and new DHCP hostnames.
 
