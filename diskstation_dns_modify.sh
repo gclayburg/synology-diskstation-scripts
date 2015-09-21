@@ -9,12 +9,6 @@ ReverseMasterFile=1.168.192.in-addr.arpa
 #todo automagically determine filenames for forward and reverse zones, so that this file does not need to be edited
 # to work in a default config
 
-#If you define StaticIpStart and StaticIpEnd, then static IP addresses defined in DNS will be preserved
-#If StaticIpStart and StaticIpEnd is not defined, then all IP addresses are assumed to be originating from DHCP assignment
-#Here we assume DHCP is configured to assign address starting at 192.168.1.100, and any IP addresses in the range of 192.168.1.1 - 192.168.1.99 are statically defined
-# within the synology DSM UI (Main Menu -> DNS Server -> Zones)
-StaticIpStart=1
-StaticIpEnd=99
 
 #Note: the remainder of this script should not need to be modified
 
@@ -64,40 +58,14 @@ printPartialDNSFile () {
    # The only exception are "ns.domain" records.  We keep those.
    #Assumptions:
    # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
-   awk -v YourNetworkName=$YourNetworkName -v staticipstart=$StaticIpStart -v staticipend=$StaticIpEnd '
-      BEGIN {
-        nsrecord="ns."
-        YourNetworkName ".";
-      }
+   awk '
       {
-        if( $3 == "A"){
-          IP=$4;
-          split(IP,iparr,".");
-          if (iparr[4] >= staticipstart && iparr[4] <= staticipend) {
-            # class C addresses between 1 and 109 are considered static IP addresses
-            # todo: parse the start and end boundaries from the DHCP config files
-            # instead of requiring manual input here
-            PrintThis=1;
-            # print records that are intended to be static IP addresses, i.e. they are not assigned by DHCP
-          } else{
-            PrintThis=0; # By default, do not print PTR or A records.
-          }
-        } else if($3 == "PTR" ){
-          REVERSEIP=$1;
-          split(REVERSEIP,iparr,".");
-          if (iparr[1] >= staticipstart && iparr[1] <= staticipend) {
-            # class C addresses between 1 and 109 are considered static IP addresses
-            # todo: parse the start and end boundaries from the DHCP config files
-            # instead of requiring manual input here
-            PrintThis=1;
-            # print records that are intended to be static IP addresses, i.e. they are not assigned by DHCP
-          } else{
-            PrintThis=0; # By default, do not print PTR or A records.
-          }
-        } else
-          PrintThis=1;
-       }
-      (($1 == nsrecord ) || ( $4 == nsrecord )) {PrintThis = 1} # Unless they talk about ns records.
+		if ($5 != ";dynamic") {
+			PrintThis=1;
+		} else{
+			PrintThis=0;
+		}
+      }
       (PrintThis == 1) {print $0 }
    ' $1
 }
@@ -123,10 +91,10 @@ printDhcpAsRecords () {
 		   # Print the last number in the IP address so we can sort the addresses
 		   # Add a tab character so that "cut" sees two fields... it will print the second
 		   # field and remove the first which is the last number in the IP address.
-		   if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa. " RENEW " PTR " NAME "." YourNetworkName "."}
-		   if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ". " RENEW " A " IP
+		   if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa.\t" RENEW "\tPTR\t" NAME "." YourNetworkName ".\t;dynamic"}
+		   if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
 		}
-	' $DHCPAssigned | sort | cut -f2 - | uniq
+	' $DHCPAssigned| sort | cut -f 2- | uniq
 }
 ##########################################################################
 # FORWARD MASTER FILE FIRST - (Logic is the same for both)
