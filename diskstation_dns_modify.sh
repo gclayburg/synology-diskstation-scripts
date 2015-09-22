@@ -75,7 +75,7 @@ printDhcpAsRecords () {
 	# Process the DHCP static and dynamic records
 	# Logic is the same for PTR and A records.  Just a different print output.
 	# Sorts and remove duplicates. Filters records you don't want.
-	awk -v YourNetworkName=$YourNetworkName -v RecordType=$1 '
+	awk -v YourNetworkName=$YourNetworkName -v RecordType=$1  -v StaticRecords=$2 '
 		BEGIN {
 		   # Set awks field separator and network adapter names.
 		   FS="[\t =,]";
@@ -88,13 +88,19 @@ printDhcpAsRecords () {
 		(IP != "") {
 		   split(IP,arr,".");
 		   ReverseIP = arr[4] "." arr[3] "." arr[2] "." arr[1];
+		   if(RecordType == "PTR" && index(StaticRecords, ReverseIP ".in-addr.arpa.," ) > 0) {IP="";}
+		   if(RecordType == "A" && index(StaticRecords, NAME "." YourNetworkName ".," ) > 0) {IP="";}
 		   # Print the last number in the IP address so we can sort the addresses
 		   # Add a tab character so that "cut" sees two fields... it will print the second
 		   # field and remove the first which is the last number in the IP address.
-		   if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa.\t" RENEW "\tPTR\t" NAME "." YourNetworkName ".\t;dynamic"}
-		   if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
+		   if(IP != "") {
+		       if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa.\t" RENEW "\tPTR\t" NAME "." YourNetworkName ".\t;dynamic"}
+			   if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
+		   }
 		}
 	' $DHCPAssigned| sort | cut -f 2- | uniq
+	
+	
 }
 ##########################################################################
 # FORWARD MASTER FILE FIRST - (Logic is the same for both)
@@ -103,10 +109,10 @@ printDhcpAsRecords () {
 #Assumptions:
 # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
 echo "Regenerating forward master file $ForwardMasterFile"
-
-printPartialDNSFile $ZonePath/$ForwardMasterFile  > $BackupPath/$ForwardMasterFile.new
-printDhcpAsRecords "A" >> $BackupPath/$ForwardMasterFile.new
-
+PARTIAL="$(printPartialDNSFile $ZonePath/$ForwardMasterFile)"
+STATIC=$(echo "$PARTIAL"|awk '{if(NF>3 && NF<6) print $1}'| tr '\n' ',')
+echo "$PARTIAL"  > $BackupPath/$ForwardMasterFile.new
+printDhcpAsRecords "A" $STATIC >> $BackupPath/$ForwardMasterFile.new
 
 ##########################################################################
 # REVERSE MASTER FILE - (Logic is the same for both)
@@ -115,9 +121,10 @@ printDhcpAsRecords "A" >> $BackupPath/$ForwardMasterFile.new
 #Assumptions:
 # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
 echo "Regenerating reverse master file $ReverseMasterFile"
-
-printPartialDNSFile $ZonePath/$ReverseMasterFile  > $BackupPath/$ReverseMasterFile.new
-printDhcpAsRecords "PTR" >> $BackupPath/$ReverseMasterFile.new
+PARTIAL="$(printPartialDNSFile $ZonePath/$ReverseMasterFile)"
+STATIC=$(echo "$PARTIAL"|awk '{if(NF>3 && NF<6) print $1}'| tr '\n' ',')
+echo "$PARTIAL" > $BackupPath/$ReverseMasterFile.new
+printDhcpAsRecords "PTR" $STATIC >> $BackupPath/$ReverseMasterFile.new
 
 
 ##########################################################################
