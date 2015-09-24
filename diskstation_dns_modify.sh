@@ -6,6 +6,26 @@
 YourNetworkName=home.lan
 ForwardMasterFile=home.lan
 ReverseMasterFile=1.168.192.in-addr.arpa
+
+overridesettings(){
+  # $1 is both script global variable name and the parameter name in settings file
+  settingsfile=$(dirname $0)/settings
+
+  if [ -r $settingsfile ]; then
+    if ignoredresult=$(cat $settingsfile | grep $1=); then
+      value=$(cat $settingsfile | grep $1= | head -1 | cut -f2 -d"=")
+      eval "$1=$value"
+      echo "[overriding] $1=$value"
+    fi
+  else
+    echo "WARNING: no settings file found.  Using default settings for $1"
+  fi
+}
+# user specific settings are loaded from settings file, if present.  This makes upgrading this script easier.
+overridesettings YourNetworkName
+overridesettings ForwardMasterFile
+overridesettings ReverseMasterFile
+
 #todo automagically determine filenames for forward and reverse zones, so that this file does not need to be edited
 # to work in a default config
 
