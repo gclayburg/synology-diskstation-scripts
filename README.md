@@ -107,7 +107,7 @@ You can now select the script from the list and Click run.  Boom.  Done.
 
 ####Troubleshooting
 
-Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at `/var/services/homes/logs/dhcp-dns.log`.  
+Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at `/var/services/homes/admin/logs/dhcp-dns.log`.  
 
 You can also view the DNS log from the normal DSM UI.  This can be useful if there is some sort of conflict between static DNS entries that you defined in the DSM DNS UI and new DHCP hostnames.
 
