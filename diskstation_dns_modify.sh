@@ -47,6 +47,10 @@ DHCPStatic=/etc/dhcpd/dhcpd-static-static.conf
 # this file may not exist if you haven't configured anything in the dhcp static reservations list (mac addr -> ip addr)
 [ -f $DHCPStatic ] && DHCPAssigned="$DHCPAssigned $DHCPStatic"
 
+DHCPeth0=/etc/dhcpd/dhcpd-eth0-static.conf
+#Reportedly, this is the name of the leases file under DSM 6.0.  If it exists, we scan it.
+[ -f $DHCPeth0 ] && DHCPAssigned="$DHCPAssigned $DHCPeth0"
+
 DHCPLeaseFile=/etc/dhcpd/dhcpd.conf.leases
 [ -f $DHCPLeaseFile ] && DHCPAssigned="$DHCPAssigned $DHCPLeaseFile"
 
