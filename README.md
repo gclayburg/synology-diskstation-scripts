@@ -53,7 +53,12 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 2015-08-13  Updated documentation
 
 2015-08-13  Updated file path in scripts to match a more generic location of the admin account directory.
-2016-04-18  Fixed issue #5, where script output would redirect to the wrong place
+
+2016-04-18  Fixed issue [#5](https://github.com/gclayburg/synology-diskstation-scripts/issues/5) (script output would redirect to the wrong place)
+
+2016-04-18  Fixed issue [#6](https://github.com/gclayburg/synology-diskstation-scripts/issues/6) (documentation)
+
+2016-04-18  Fixed issue [#7](https://github.com/gclayburg/synology-diskstation-scripts/issues/7) (added new lease file location for DSM 6.0)
 
 ####Deployment
 
