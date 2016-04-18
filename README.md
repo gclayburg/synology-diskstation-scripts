@@ -109,7 +109,7 @@ If it is inconvenient to restart your Synology Diskstation, there is an alternat
 5.  Key in this in the User-defined script area and click OK:
 
 ```sh
-        /usr/local/etc/rc.d/S99pollDHCP.sh >>/var/services/homes/admin/startS99pollDHCP.log
+        /usr/local/etc/rc.d/S99pollDHCP.sh start >>/var/services/homes/admin/startS99pollDHCP.log
 ```
 
 You can now select the script from the list and Click run.  Boom.  Done.
