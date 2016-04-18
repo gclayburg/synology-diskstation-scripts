@@ -53,7 +53,7 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 2015-08-13  Updated documentation
 
 2015-08-13  Updated file path in scripts to match a more generic location of the admin account directory.
-
+2016-04-18  Fixed issue #5, where script output would redirect to the wrong place
 
 ####Deployment
 
@@ -66,8 +66,17 @@ You will need to:
     -rwxr-xr-x    1 root     root          7798 May  1 15:07 /var/services/homes/admin/diskstation_dns_modify.sh
     -rwxr-xr-x    1 root     root           283 Nov 21  2014 /var/services/homes/admin/poll-dhcp-changes.sh
     ```
+   These scripts do not need to be modified.
 
-2. The `diskstation_dns_modify.sh` script needs to be modified to match your network.  See the comments in the script for details.
+2. Install the settings file to the admin directory:
+
+    ```
+    DiskStation> ls -l /var/services/homes/admin/settings                              
+    -rw-r--r--    1 root     root           109 Sep 24  2015 /var/services/homes/admin/settings
+    ```
+
+The settings file needs to be modified to match your network.  See the comments in the `diskstation_dns_modify.sh` script for details.
+
 3. Install the start script into `/usr/local/etc/rc.d/ directory`.  It also should be owed by root and executable.
 
 ```

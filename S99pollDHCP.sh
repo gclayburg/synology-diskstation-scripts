@@ -12,6 +12,7 @@
 if [ "$1" = "start"  ]; then
 #nohup ./poll-dhcp-changes.sh >> /var/services/homes/admin/logs/dhcp-dns.log 2>&1 &
 #nohup does not work on synology.
+  ADMIN_DIR=/var/services/homes/admin
   date
   echo "is poll-dhcp-changes.sh running?"
   POLL_RUNNING=`ps | grep poll-dhcp-changes | grep -v grep |wc -l`
@@ -19,8 +20,11 @@ if [ "$1" = "start"  ]; then
     echo "poll-dhcp-changes already running."
   else
     echo "starting poll-dhcp-changes"
-    mkdir /var/services/homes/admin/logs/
-    /var/services/homes/admin/poll-dhcp-changes.sh >> pwd 2>&1 &
+    LOG_DIR=$ADMIN_DIR/logs
+    if [ ! -e "$LOG_DIR" ]; then
+      mkdir -p $LOG_DIR
+    fi
+    $ADMIN_DIR/poll-dhcp-changes.sh >>  $LOG_DIR/dhcp-dns.log 2>&1 &
   fi
 
 elif [ "$1" = "stop" ]; then
