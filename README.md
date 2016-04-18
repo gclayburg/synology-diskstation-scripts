@@ -75,7 +75,7 @@ You will need to:
     -rw-r--r--    1 root     root           109 Sep 24  2015 /var/services/homes/admin/settings
     ```
 
-The settings file needs to be modified to match your network.  See the comments in the `diskstation_dns_modify.sh` script for details.
+    The settings file needs to be modified to match your network.  See the comments in the `diskstation_dns_modify.sh` script for details.
 
 3. Install the start script into `/usr/local/etc/rc.d/ directory`.  It also should be owed by root and executable.
 
