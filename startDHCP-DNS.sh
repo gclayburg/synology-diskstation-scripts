@@ -4,7 +4,7 @@
 # DSM task scheduler.
 date
 echo "is poll-dhcp-changes.sh running?"
-POLL_RUNNING=`ps | grep poll-dhcp-changes | grep -v grep |wc -l`
+POLL_RUNNING=`ps x | grep poll-dhcp-changes | grep -v grep |wc -l`
 if [ $POLL_RUNNING -gt "0" ]; then
   echo "poll-dhcp-changes already running."
 else
