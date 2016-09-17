@@ -60,6 +60,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2016-04-18  Fixed issue [#7](https://github.com/gclayburg/synology-diskstation-scripts/issues/7) (added new lease file location for DSM 6.0)
 
+2016-09-17  log file now prints out more debug information about both static and dynamic addresses populated into DNS records
+
 ####Deployment
 
 You will need to:
