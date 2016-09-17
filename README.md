@@ -62,6 +62,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2016-09-17  log file now prints out more debug information about both static and dynamic addresses populated into DNS records
 
+2016-09-17  S99pollDHCP.sh should now work correctly under both DSM 5 and DSM 6
+
 ####Deployment
 
 You will need to:
