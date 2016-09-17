@@ -7,6 +7,12 @@ YourNetworkName=home.lan
 ForwardMasterFile=home.lan
 ReverseMasterFile=1.168.192.in-addr.arpa
 
+LOG_CONTEXT="-"  #override to add extra stuff to log messages
+date_echo(){
+    datestamp=$(date +%F_%T)
+    echo "${datestamp} ${LOG_CONTEXT} $*"
+}
+
 overridesettings(){
   # $1 is both script global variable name and the parameter name in settings file
   settingsfile=$(dirname $0)/settings
@@ -15,12 +21,13 @@ overridesettings(){
     if ignoredresult=$(cat $settingsfile | grep $1=); then
       value=$(cat $settingsfile | grep $1= | head -1 | cut -f2 -d"=")
       eval "$1=$value"
-      echo "[overriding] $1=$value"
+      date_echo "[overriding] $1=$value"
     fi
   else
-    echo "WARNING: no settings file found.  Using default settings for $1"
+    date_echo "WARNING: no settings file found.  Using default settings for $1"
   fi
 }
+date_echo " $0 starting..."
 # user specific settings are loaded from settings file, if present.  This makes upgrading this script easier.
 overridesettings YourNetworkName
 overridesettings ForwardMasterFile
@@ -31,7 +38,6 @@ overridesettings ReverseMasterFile
 
 
 #Note: the remainder of this script should not need to be modified
-
 # Note that backup path is also used as a temp folder.
 BackupPath=/var/services/homes/admin/scripts/dns_backups
 ZoneRootDir=/var/packages/DNSServer/target
@@ -66,14 +72,14 @@ DHCPLeaseFile=/etc/dhcpd/dhcpd.conf.leases
 # retained for one year.
 #
 if ! mkdir -p ${BackupPath}; then
-  echo "Error: cannot create backup directory"
+  date_echo "Error: cannot create backup directory"
   exit 3
 fi
 
 tmpPrefix=$BackupPath/DNS_Backup_$(date +%m%d)
-echo "Backing up DNS files to $tmpPrefix.*"
-[ -f $tmpPrefix.$ForwardMasterFile ] && echo "INFO: Forward master already backed up for today." || cp -a $ZonePath/$ForwardMasterFile $tmpPrefix.$ForwardMasterFile
-[ -f $tmpPrefix.$ReverseMasterFile ] && echo "INFO: Reverse master already backed up for today." || cp -a $ZonePath/$ReverseMasterFile $tmpPrefix.$ReverseMasterFile
+date_echo "Backing up DNS files to $tmpPrefix.*"
+[ -f $tmpPrefix.$ForwardMasterFile ] && date_echo "INFO: Forward master already backed up for today." || cp -a $ZonePath/$ForwardMasterFile $tmpPrefix.$ForwardMasterFile
+[ -f $tmpPrefix.$ReverseMasterFile ] && date_echo "INFO: Reverse master already backed up for today." || cp -a $ZonePath/$ReverseMasterFile $tmpPrefix.$ReverseMasterFile
 
 # Declare reusable functions.  Logic is pretty much the same for forward and reverse files.
 printPartialDNSFile () {
@@ -132,10 +138,16 @@ printDhcpAsRecords () {
 # The only exception are "ns.domain" records.  We keep those.
 #Assumptions:
 # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
-echo "Regenerating forward master file $ForwardMasterFile"
+date_echo "Regenerating forward master file $ForwardMasterFile"
 PARTIAL="$(printPartialDNSFile $ZonePath/$ForwardMasterFile)"
+date_echo "forward master file static DNS addresses:"
+echo "$PARTIAL"
+echo
 STATIC=$(echo "$PARTIAL"|awk '{if(NF>3 && NF<6) print $1}'| tr '\n' ',')
 echo "$PARTIAL"  > $BackupPath/$ForwardMasterFile.new
+date_echo "adding these DHCP leases to DNS forward master file:"
+printDhcpAsRecords "A" $STATIC
+echo
 printDhcpAsRecords "A" $STATIC >> $BackupPath/$ForwardMasterFile.new
 
 ##########################################################################
@@ -144,21 +156,27 @@ printDhcpAsRecords "A" $STATIC >> $BackupPath/$ForwardMasterFile.new
 # The only exception are "ns.domain" records.  We keep those.
 #Assumptions:
 # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
-echo "Regenerating reverse master file $ReverseMasterFile"
+date_echo "Regenerating reverse master file $ReverseMasterFile"
 PARTIAL="$(printPartialDNSFile $ZonePath/$ReverseMasterFile)"
 STATIC=$(echo "$PARTIAL"|awk '{if(NF>3 && NF<6) print $1}'| tr '\n' ',')
+date_echo "Reverse master file static DNS addresses:"
+echo "$PARTIAL"
+echo
 echo "$PARTIAL" > $BackupPath/$ReverseMasterFile.new
+date_echo "adding these DHCP leases to DNS reverse master file: "
+printDhcpAsRecords "PTR" $STATIC
+echo
 printDhcpAsRecords "PTR" $STATIC >> $BackupPath/$ReverseMasterFile.new
 
 
 ##########################################################################
 # Ensure the owner/group and modes are set at default
 # then overwrite the original files
-echo "Overwriting with updated files: $ForwardMasterFile $ReverseMasterFile"
+date_echo "Overwriting with updated files: $ForwardMasterFile $ReverseMasterFile"
 if ! chown nobody:nobody $BackupPath/$ForwardMasterFile.new $BackupPath/$ReverseMasterFile.new ; then
-  echo "Error:  Cannot change file ownership"
-  echo ""
-  echo "Try running this script as root for correct permissions"
+  date_echo "Error:  Cannot change file ownership"
+  date_echo ""
+  date_echo "Try running this script as root for correct permissions"
   exit 4
 fi
 chmod 644 $BackupPath/$ForwardMasterFile.new $BackupPath/$ReverseMasterFile.new
@@ -172,4 +190,5 @@ mv -f $BackupPath/$ReverseMasterFile.new $ZonePath/$ReverseMasterFile
 # Reload the server config after modifications
 $ZoneRootDir/script/reload.sh
 
+date_echo "$0 complete."
 exit 0
