@@ -132,6 +132,19 @@ printDhcpAsRecords () {
 	
 	
 }
+
+incrementSerial () {
+# serial number must be incremented in SOA record when DNS changes are made so that slaves will recognize a change
+  ser=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' -e 's/;.*//' )  #isolate DNS serial from first line following SOA
+  comments=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' | sed -n '/;/p' |sed -e 's/.*;//' )  #preserve any comments, if any exist
+  bumpedserial=$(( $ser +1 ))
+
+  sed -n '1,/.*SOA/p' $1
+  echo -e "\t$bumpedserial ;$comments"
+  sed -e '1,/.*SOA/d' $1 | sed -n '2,$p'
+
+
+}
 ##########################################################################
 # FORWARD MASTER FILE FIRST - (Logic is the same for both)
 # Print everything except for PTR and A records.
@@ -150,6 +163,8 @@ printDhcpAsRecords "A" $STATIC
 echo
 printDhcpAsRecords "A" $STATIC >> $BackupPath/$ForwardMasterFile.new
 
+incrementSerial $BackupPath/$ForwardMasterFile.new > $BackupPath/$ForwardMasterFile.bumped
+
 ##########################################################################
 # REVERSE MASTER FILE - (Logic is the same for both)
 # Print everything except for PTR and A records.
@@ -167,24 +182,25 @@ date_echo "adding these DHCP leases to DNS reverse master file: "
 printDhcpAsRecords "PTR" $STATIC
 echo
 printDhcpAsRecords "PTR" $STATIC >> $BackupPath/$ReverseMasterFile.new
+incrementSerial $BackupPath/$ReverseMasterFile.new > $BackupPath/$ReverseMasterFile.bumped
 
 
 ##########################################################################
 # Ensure the owner/group and modes are set at default
 # then overwrite the original files
 date_echo "Overwriting with updated files: $ForwardMasterFile $ReverseMasterFile"
-if ! chown nobody:nobody $BackupPath/$ForwardMasterFile.new $BackupPath/$ReverseMasterFile.new ; then
+if ! chown nobody:nobody $BackupPath/$ForwardMasterFile.bumped $BackupPath/$ReverseMasterFile.bumped ; then
   date_echo "Error:  Cannot change file ownership"
   date_echo ""
   date_echo "Try running this script as root for correct permissions"
   exit 4
 fi
-chmod 644 $BackupPath/$ForwardMasterFile.new $BackupPath/$ReverseMasterFile.new
+chmod 644 $BackupPath/$ForwardMasterFile.bumped $BackupPath/$ReverseMasterFile.bumped
 #cp -a $BackupPath/$ForwardMasterFile.new $ZonePath/$ForwardMasterFile 
 #cp -a $BackupPath/$ReverseMasterFile.new $ZonePath/$ReverseMasterFile 
 
-mv -f $BackupPath/$ForwardMasterFile.new $ZonePath/$ForwardMasterFile
-mv -f $BackupPath/$ReverseMasterFile.new $ZonePath/$ReverseMasterFile
+mv -f $BackupPath/$ForwardMasterFile.bumped $ZonePath/$ForwardMasterFile
+mv -f $BackupPath/$ReverseMasterFile.bumped $ZonePath/$ReverseMasterFile
 
 ##########################################################################
 # Reload the server config after modifications

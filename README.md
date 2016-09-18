@@ -64,6 +64,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2016-09-17  S99pollDHCP.sh should now work correctly under both DSM 5 and DSM 6
 
+2016-09-17  Fixed issue [#11](https://github.com/gclayburg/synology-diskstation-scripts/issues/11) Serial # is now updated for DNS zone master forward and reverse files
+
 ####Deployment
 
 You will need to:
