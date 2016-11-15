@@ -44,6 +44,11 @@ ZoneRootDir=/var/packages/DNSServer/target
 ZonePath=$ZoneRootDir/named/etc/zone/master
 DHCPAssigned=/etc/dhcpd/dhcpd.conf
 
+NetworkInterfaces=",`ip -o link show | awk -F': ' '{printf $2","}'`"
+
+date_echo "Network interfaces:"
+date_echo $NetworkInterfaces
+
 # An address may not have been assigned yet so verify
 # the leases log file exists before assigning.
 DHCPLeases=/etc/dhcpd/dhcpd-leases.log
@@ -105,30 +110,33 @@ printDhcpAsRecords () {
 	# Process the DHCP static and dynamic records
 	# Logic is the same for PTR and A records.  Just a different print output.
 	# Sorts and remove duplicates. Filters records you don't want.
-	awk -v YourNetworkName=$YourNetworkName -v RecordType=$1  -v StaticRecords=$2 '
-		BEGIN {
-		   # Set awks field separator and network adapter names.
-		   FS="[\t =,]";
-		   adapters=",eth0,eth1,eth2,eth3,eth4,eth5,eth6,eth7,bond0,bond1,bond2,bond3,,*,";
-		}
-		{IP=""} # clear out variables
-		$1 ~ /^[0-9]/ {IP=$3; NAME=$4; RENEW=86400} # Leases start with numbers
-		$1 == "dhcp-host" {IP=$4; NAME=$3; RENEW=$5} # Static assignments start with dhcp-host
-		index(adapters, "," NAME "," ) > 0 {IP="";} # Dont print if machine name is a network adapter
-		(IP != "") {
-		   split(IP,arr,".");
-		   ReverseIP = arr[4] "." arr[3] "." arr[2] "." arr[1];
-		   if(RecordType == "PTR" && index(StaticRecords, ReverseIP ".in-addr.arpa.," ) > 0) {IP="";}
-		   if(RecordType == "A" && index(StaticRecords, NAME "." YourNetworkName ".," ) > 0) {IP="";}
-		   # Print the last number in the IP address so we can sort the addresses
-		   # Add a tab character so that "cut" sees two fields... it will print the second
-		   # field and remove the first which is the last number in the IP address.
-		   if(IP != "") {
-		       if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa.\t" RENEW "\tPTR\t" NAME "." YourNetworkName ".\t;dynamic"}
-			   if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
-		   }
-		}
-	' $DHCPAssigned| sort | cut -f 2- | uniq
+    awk -v YourNetworkName=$YourNetworkName -v RecordType=$1  -v StaticRecords=$2 -v adapters=$NetworkInterfaces '
+        BEGIN {
+           # Set awks field separator
+           FS="[\t =,]";
+        }
+        {IP=""} # clear out variables
+        # Leases start with numbers. Do not use if column 4 is an interface
+        $1 ~ /^[0-9]/ {  if(NF>4 || index(adapters, "," $4 "," ) == 0) { IP=$3; NAME=$4; RENEW=86400 } } 
+        # Static assignments start with dhcp-host
+        $1 == "dhcp-host" {IP=$4; NAME=$3; RENEW=$5}
+        # If we have an IP and a NAME (and if name is not a placeholder)
+        (IP != "" && NAME!="*" && NAME!="") {
+           split(IP,arr,".");
+           ReverseIP = arr[4] "." arr[3] "." arr[2] "." arr[1];
+           if(RecordType == "PTR" && index(StaticRecords, ReverseIP ".in-addr.arpa.," ) > 0) {IP="";}
+           if(RecordType == "A" && index(StaticRecords, NAME "." YourNetworkName ".," ) > 0) {IP="";}
+           # Remove invalid characters according to rfc952
+           gsub(/([^a-zA-Z0-9-]*|^[-]*|[-]*$)/,"",NAME)
+           # Print the last number in the IP address so we can sort the addresses
+           # Add a tab character so that "cut" sees two fields... it will print the second
+           # field and remove the first which is the last number in the IP address.
+           if(IP != "" && NAME!="*" && NAME!="") {
+               if (RecordType == "PTR") {print 1000 + arr[4] "\t" ReverseIP ".in-addr.arpa.\t" RENEW "\tPTR\t" NAME "." YourNetworkName ".\t;dynamic"}
+               if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
+           }
+        }
+    ' $DHCPAssigned| sort | cut -f 2- | uniq	
 	
 	
 }
