@@ -26,22 +26,31 @@ if [ "$1" = "start"  ]; then
   ADMIN_DIR=/var/services/homes/admin
   date_echo "is poll-dhcp-changes.sh running?"
   POLL_RUNNING=`$PS | grep poll-dhcp-changes | grep -v grep |wc -l`
-  if [ $POLL_RUNNING -gt "0" ]; then
+  if [ $POLL_RUNNING -gt 0 ]; then
     date_echo "poll-dhcp-changes already running."
   else
     date_echo "starting poll-dhcp-changes"
     LOG_DIR=$ADMIN_DIR/logs
-    if [ ! -e "$LOG_DIR" ]; then
+    if [ ! -d "$LOG_DIR" ]; then
       mkdir -p $LOG_DIR
     fi
     $ADMIN_DIR/poll-dhcp-changes.sh >>  $LOG_DIR/dhcp-dns.log 2>&1 &
   fi
 
 elif [ "$1" = "stop" ]; then
-  MYPID=`$PS | grep poll-dhcp-changes | grep -v grep | awk -F' ' '{print $1}'`
-  if [ "$MYPID" -gt "1" ]; then
+  MYPID=`$PS | grep poll-dhcp-changes | grep -v grep | head -1 |awk -F' ' '{print $1}'`
+  #if for some reason there are more than 1 poll-dhcp-changes process running, just kill the first one found.
+  if [ "$MYPID" -gt 1 ]; then
     date_echo "killing PID: $MYPID"
     kill $MYPID
+  fi
+elif [ "$1" = "status" ]; then
+  POLL_RUNNING=`$PS | grep poll-dhcp-changes | grep -v grep | wc -l`
+  if [ "$POLL_RUNNING" -gt 0 ]; then
+    date_echo "poll-dhcp-changes is running:"
+    $PS | grep poll-dhcp-changes | grep -v grep
+  else
+    date_echo "poll-dhcp-changes is stopped."
   fi
 fi
 
