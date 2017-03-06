@@ -66,6 +66,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2016-09-17  Fixed issue [#11](https://github.com/gclayburg/synology-diskstation-scripts/issues/11) Serial # is now updated for DNS zone master forward and reverse files
 
+2017-02-22 Fixed issue [#19](https://github.com/gclayburg/synology-diskstation-scripts/issues/19) S99pollDHCP.sh now has a "status" command and also handles the situation where multiple poll-dhcp-changes.sh process may have been erroneously running
+
 ####Deployment
 
 You will need to:
