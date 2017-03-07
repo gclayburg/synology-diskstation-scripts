@@ -68,6 +68,10 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2017-02-22 Fixed issue [#19](https://github.com/gclayburg/synology-diskstation-scripts/issues/19) S99pollDHCP.sh now has a "status" command and also handles the situation where multiple poll-dhcp-changes.sh process may have been erroneously running
 
+2017-03-06 diskstation_dns_modify.sh now uses a more deterministic method for gathering network interfaces instead of making assumptions about which network interfaces are present PR [#17](https://github.com/gclayburg/synology-diskstation-scripts/pull/17)
+
+2017-03-06 diskstation_dns_modify.sh now removes invalid characters from generated DNS hostnames per RFC 952  PR [#17](https://github.com/gclayburg/synology-diskstation-scripts/pull/17) 
+
 ####Deployment
 
 You will need to:
