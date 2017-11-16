@@ -95,16 +95,11 @@ printPartialDNSFile () {
    # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
    awk '
       {
-      if (match($0, "1 ;") == 0 ) {
-  		  if (match($0, ";dynamic") == 0) {
-  			  PrintThis=1;
-  		  } else {
-  			  PrintThis=0;
-  		  } else {
-          PrintThis=0;
+        if (length($0) < 5) { next };
+        if (match($0, ";dynamic") != 0) { next };
+        if (match($0, "1 ;") != 0) { next };
+        print $0;
       }
-      }
-      (PrintThis == 1) {print $0 }
    ' $1
 }
 
