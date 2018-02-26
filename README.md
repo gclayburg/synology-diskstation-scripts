@@ -5,12 +5,12 @@ Scripts that help with Synology Diskstation maintenance
 
 
 
-##Why do I need this?
+## Why do I need this?
 
-#tl;dr version:  
+# tl;dr version:  
 You are running Synology Diskstation DNS and DHCP services and you want dynamic DHCP reservations to update DNS immediately.
 
-#Background
+# Background
 Synology Diskstation has an embedded DNS server that can be enabled for your network.  This does the standard thing of resolving hostnames to IP addresses.  So, lets say you have a VMware ESXi server on your local network. You arbitrarily name it `esxi1.homelan.net`.   The DNS server is where you map the name `esxi1.homelan.net` to the static IP address of `192.168.1.10`.  From then on, all other devices in your network can access this server using the name `esxi.homelan.net`.  Only the DNS server needs to remember the IP address.  Nothing new here.
 
 Synology diskstation also has a DHCP server that you can use to dynamically assign IP addreses to hosts on your network.  This means you can power up a new laptop, ipad, or guest VM on your network and it will be able to use the network without configuring anything.  Under the covers, they use DHCP to get an available IP address from your DHCP server.
@@ -21,11 +21,11 @@ For the average consumer client device like a laptop or ipad, this is normally f
 
 This becomes more of an issue when you have more devices and servers running on your network.  The default for most new servers and clients is to use DHCP to get an IP address.  This makes things simpler for setting up that new linux distribution, but gets in the way when you want to experimient with some server software on there.  One approach is to manually assign a static IP address and create a static DNS entry for this new server.  This is something you would want to do if you know you want to keep that server around for a while.  But if you are just messing around with something new, it is quite handy to have all of this taken care of for you.  This is where this project comes in.
 
-##diskstation_dns_modify.sh
+## diskstation_dns_modify.sh
 
 This script can be used to configure a synology diskstation to automatically update its internal DNS records from its internal DHCP server.  As of 2014-10-20 Synology Diskstation DSM cannot do this from the GUI.
 
-###Credit
+### Credit
 
 The script originated from Tim Smith here:
 
@@ -36,7 +36,7 @@ Original docs:
 https://www.youtube.com/watch?v=T22xytAWq3A&list=UUp8GcSEeUnLY8d6RAT6Y3Mg
 
 
-###changelog
+### changelog
 
 2014-10-20  Modified to honor DNS static IP addresses
 
@@ -72,7 +72,7 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2017-03-06 diskstation_dns_modify.sh now removes invalid characters from generated DNS hostnames per RFC 952  PR [#17](https://github.com/gclayburg/synology-diskstation-scripts/pull/17) 
 
-####Deployment
+#### Deployment
 
 You will need to:
 
@@ -116,7 +116,7 @@ DiskStation> /usr/local/etc/rc.d/S99pollDHCP.sh stop
 __Warning__ If you manually start the server manually like this, this script will only run while you are logged on to the ssh console.  The script will stop once you log off.  DNS will not be updated from new reservations until this script is started again.  To run the script permanently, you will need to reboot your Synology Diskstation.   This is because there is no "nohup" command in the standard Synology DSM.  
 
 
-####Starting via Task Scheduler
+#### Starting via Task Scheduler
 If it is inconvenient to restart your Synology Diskstation, there is an alternate way to start this service using the DSM Task Scheduler (Main Menu -> Control Panel -> Task Scheduler).  The script will run indefinitely when started this way.  This is basically a way to simulate "nohup" without going down the path of installing extra software on Synology DSM just to avoid having to do a reboot the first time the software is installed.
 
 1.  Open Task Scheduler
@@ -131,7 +131,7 @@ If it is inconvenient to restart your Synology Diskstation, there is an alternat
 
 You can now select the script from the list and Click run.  Boom.  Done.
 
-####Troubleshooting
+#### Troubleshooting
 
 Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at `/var/services/homes/admin/logs/dhcp-dns.log`.  
 
