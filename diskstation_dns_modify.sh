@@ -97,7 +97,7 @@ printPartialDNSFile () {
       {
         if (length($0) < 1) { next };
         if (match($0, ";dynamic") != 0) { next };
-        if (match($0, "1 ;") != 0) { next };
+        if (match($0, "[ \t]*1 ;") != 0) { next };
         print $0;
       }
    ' $1
