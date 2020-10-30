@@ -141,7 +141,7 @@ printDhcpAsRecords () {
 
 incrementSerial () {
 # serial number must be incremented in SOA record when DNS changes are made so that slaves will recognize a change
-  ser=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' -e 's/;.*//' )  #isolate DNS serial from first line following SOA
+  ser=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' -e 's/[ \t]*//' -e 's/;.*//' )  #isolate DNS serial from first line following SOA, removing white space
   comments=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' | sed -n '/;/p' |sed -e 's/.*;//' )  #preserve any comments, if any exist
   bumpedserial=$(( $ser +1 ))
 
