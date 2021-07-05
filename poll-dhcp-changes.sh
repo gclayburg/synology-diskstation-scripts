@@ -1,7 +1,7 @@
 #!/bin/sh
 
 while true; do    
-   ATIME=`stat /etc/dhcpd/dhcpd-leases.log | grep Modify`
+   ATIME=`stat /etc/dhcpd/dhcpd.conf.leases g | grep Modify`
    
    if [[ "$ATIME" != "$LTIME" ]]; then
      date
@@ -11,5 +11,3 @@ while true; do
    fi
    sleep 5
 done
-
-
