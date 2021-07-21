@@ -72,6 +72,8 @@ For example, lets say you have configured DNS in synology DSM.  You are manually
 
 2017-03-06 diskstation_dns_modify.sh now removes invalid characters from generated DNS hostnames per RFC 952  PR [#17](https://github.com/gclayburg/synology-diskstation-scripts/pull/17) 
 
+2021-7-21 Fixed issue [#34](https://github.com/gclayburg/synology-diskstation-scripts/issues/34) Better error checking for using DHCP files created when running DSM 7.
+
 #### Deployment
 
 You will need to:
