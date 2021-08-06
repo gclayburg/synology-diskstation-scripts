@@ -122,6 +122,7 @@ printDhcpAsRecords () {
         $1 == "dhcp-host" {IP=$4; NAME=$3; RENEW=$5}
         # If we have an IP and a NAME (and if name is not a placeholder)
         (IP != "" && NAME!="*" && NAME!="") {
+           NAME=tolower(NAME);
            split(IP,arr,".");
            ReverseIP = arr[4] "." arr[3] "." arr[2] "." arr[1];
            if(RecordType == "PTR" && index(StaticRecords, ReverseIP ".in-addr.arpa.," ) > 0) {IP="";}
