@@ -72,7 +72,7 @@ DHCPLeaseFile=/etc/dhcpd/dhcpd.conf.leases
 
 ##########################################################################
 # Back up the forward and reverse master files
-# Two options: a) One backup which is overwritten each time 
+# Two options: a) One backup which is overwritten each time
 # or b) file is backed up once each day... but only the first use and
 # retained for one year.
 #
@@ -95,13 +95,10 @@ printPartialDNSFile () {
    # PTR and A records should be removed unless they contain "ns.<YourNetworkName>."
    awk '
       {
-		if ($5 != ";dynamic") {
-			PrintThis=1;
-		} else{
-			PrintThis=0;
-		}
+        if (length($0) < 1) { next };
+        if (match($0, ";dynamic") != 0) { next };
+        print $0;
       }
-      (PrintThis == 1) {print $0 }
    ' $1
 }
 
@@ -117,7 +114,7 @@ printDhcpAsRecords () {
         }
         {IP=""} # clear out variables
         # Leases start with numbers. Do not use if column 4 is an interface
-        $1 ~ /^[0-9]/ {  if(NF>4 || index(adapters, "," $4 "," ) == 0) { IP=$3; NAME=$4; RENEW=86400 } } 
+        $1 ~ /^[0-9]/ {  if(NF>4 || index(adapters, "," $4 "," ) == 0) { IP=$3; NAME=$4; RENEW=86400 } }
         # Static assignments start with dhcp-host
         $1 == "dhcp-host" {IP=$4; NAME=$3; RENEW=$5}
         # If we have an IP and a NAME (and if name is not a placeholder)
@@ -136,14 +133,14 @@ printDhcpAsRecords () {
                if (RecordType == "A") print 2000 + arr[4] "\t" NAME "." YourNetworkName ".\t" RENEW "\tA\t" IP "\t;dynamic"
            }
         }
-    ' $DHCPAssigned| sort | cut -f 2- | uniq	
-	
-	
+    ' $DHCPAssigned| sort | cut -f 2- | uniq
+
+
 }
 
 incrementSerial () {
 # serial number must be incremented in SOA record when DNS changes are made so that slaves will recognize a change
-  ser=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' -e 's/;.*//' )  #isolate DNS serial from first line following SOA
+  ser=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' -e 's/[ \t]*//' -e 's/;.*//' )  #isolate DNS serial from first line following SOA, removing white space
   comments=$(sed -e '1,/.*SOA/d' $1 | sed -e '2,$d' | sed -n '/;/p' |sed -e 's/.*;//' )  #preserve any comments, if any exist
   bumpedserial=$(( $ser +1 ))
 
@@ -204,8 +201,8 @@ if ! chown nobody:nobody $BackupPath/$ForwardMasterFile.bumped $BackupPath/$Reve
   exit 4
 fi
 chmod 644 $BackupPath/$ForwardMasterFile.bumped $BackupPath/$ReverseMasterFile.bumped
-#cp -a $BackupPath/$ForwardMasterFile.new $ZonePath/$ForwardMasterFile 
-#cp -a $BackupPath/$ReverseMasterFile.new $ZonePath/$ReverseMasterFile 
+#cp -a $BackupPath/$ForwardMasterFile.new $ZonePath/$ForwardMasterFile
+#cp -a $BackupPath/$ReverseMasterFile.new $ZonePath/$ReverseMasterFile
 
 mv -f $BackupPath/$ForwardMasterFile.bumped $ZonePath/$ForwardMasterFile
 mv -f $BackupPath/$ReverseMasterFile.bumped $ZonePath/$ReverseMasterFile
