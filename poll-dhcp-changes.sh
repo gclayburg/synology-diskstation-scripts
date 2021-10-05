@@ -22,7 +22,7 @@ while true; do
   fi
   if "$reload_dns"; then
     echo "dhcp leases changed - reloading DNS"
-    /var/services/homes/admin/diskstation_dns_modify.sh
+    $(dirname $0)/diskstation_dns_modify.sh
   fi
   sleep 5
 done
