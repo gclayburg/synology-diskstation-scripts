@@ -24,6 +24,11 @@ if [ "$1" = "start"  ]; then
 #nohup ./poll-dhcp-changes.sh >> /var/services/homes/admin/logs/dhcp-dns.log 2>&1 &
 #nohup does not work on synology.
   ADMIN_DIR=/var/services/homes/admin
+  ME=$(readlink $0)
+  if [ ! -z $ME ]; then
+	ADMIN_DIR=$(dirname $ME)
+  fi
+  date_echo system root folder is $ADMIN_DIR
   date_echo "is poll-dhcp-changes.sh running?"
   POLL_RUNNING=`$PS | grep poll-dhcp-changes | grep -v grep |wc -l`
   if [ $POLL_RUNNING -gt 0 ]; then
