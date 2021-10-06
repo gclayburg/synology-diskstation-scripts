@@ -24,9 +24,19 @@ if [ "$1" = "start"  ]; then
 #nohup ./poll-dhcp-changes.sh >> /var/services/homes/admin/logs/dhcp-dns.log 2>&1 &
 #nohup does not work on synology.
   ADMIN_DIR=/var/services/homes/admin
+  # Try and read the link.  If nothing comes back, we're not a link, we've been copied
   ME=$(readlink $0)
   if [ ! -z $ME ]; then
 	ADMIN_DIR=$(dirname $ME)
+  fi
+  if [ ! -e $ADMIN_DIR/poll-dhcp-changes.sh ]; then
+	date_echo "ERROR: can't read $ADMIN_DIR/poll-dhcp-changes.sh. Trying $(pwd)..." 1>&2
+	ADMIN_DIR=$(pwd)
+  fi
+  if [ ! -e $ADMIN_DIR/poll-dhcp-changes.sh ]; then
+	date_echo "ERROR: still can't read poll-dhcp-changes.sh." 1>&2
+	date_echo "       Did you mean to symlink the init.d script instead of copying it?" 1>&2
+	exit 1
   fi
   date_echo system root folder is $ADMIN_DIR
   date_echo "is poll-dhcp-changes.sh running?"
