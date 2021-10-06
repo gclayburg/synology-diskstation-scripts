@@ -133,6 +133,9 @@ If it is inconvenient to restart your Synology Diskstation, there is an alternat
 
 You can now select the script from the list and Click run.  Boom.  Done.
 
+#### Alternate Locations
+To use the system from another location on the filesystem, symlink `S99pollDHCPsh` into /usr/local/etc/rc.d instead of copying it.  It will execute the two scripts and read settings from the install location.  File permissions must all be configured as described above.
+
 #### Troubleshooting
 
 Each time this script detects that that there is a DHCP change, DNS will be updated.  It may take up to 10 seconds for DNS to be updated after a new DHCP reservation.  A log file of this process is kept at `/var/services/homes/admin/logs/dhcp-dns.log`.  
