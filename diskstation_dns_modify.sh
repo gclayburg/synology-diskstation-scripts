@@ -44,6 +44,24 @@ ZoneRootDir=/var/packages/DNSServer/target
 ZonePath=$ZoneRootDir/named/etc/zone/master
 DHCPAssigned=/etc/dhcpd/dhcpd.conf
 
+getdsmversion(){
+  tmpfile=/tmp/$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32)
+  echo $(head -n 1 /etc.defaults/VERSION) > $tmpfile
+  source $tmpfile
+  echo $majorversion
+  rm -f $tmpfile
+}
+dsmversion=$(getdsmversion)
+
+case  $dsmversion  in
+  6)       
+    owner=nobody
+    ;;
+  7)
+    owner=DNSServer
+    ;;
+esac
+
 NetworkInterfaces=",`ip -o link show | awk -F': ' '{printf $2","}'`"
 
 date_echo "Network interfaces:"
@@ -197,7 +215,7 @@ incrementSerial $BackupPath/$ReverseMasterFile.new > $BackupPath/$ReverseMasterF
 # Ensure the owner/group and modes are set at default
 # then overwrite the original files
 date_echo "Overwriting with updated files: $ForwardMasterFile $ReverseMasterFile"
-if ! chown nobody:nobody $BackupPath/$ForwardMasterFile.bumped $BackupPath/$ReverseMasterFile.bumped ; then
+if ! chown $owner:$owner $BackupPath/$ForwardMasterFile.bumped $BackupPath/$ReverseMasterFile.bumped ; then
   date_echo "Error:  Cannot change file ownership"
   date_echo ""
   date_echo "Try running this script as root for correct permissions"
