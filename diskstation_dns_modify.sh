@@ -47,10 +47,11 @@ DHCPAssigned=/etc/dhcpd/dhcpd.conf
 getdsmversion(){
   #todo: filter out variables that are not used. https://community.synology.com/enu/forum/17/post/72754
   source /etc.defaults/VERSION
+  echo $majorversion
 }
-getdsmversion
+dsmversion=$(getdsmversion)
 
-case  $majorversion  in
+case  $dsmversion  in
   6)       
     owner=nobody
     ;;
