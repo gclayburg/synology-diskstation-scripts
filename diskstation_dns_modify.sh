@@ -45,9 +45,11 @@ ZonePath=$ZoneRootDir/named/etc/zone/master
 DHCPAssigned=/etc/dhcpd/dhcpd.conf
 
 getdsmversion(){
-  #todo: filter out variables that are not used. https://community.synology.com/enu/forum/17/post/72754
-  source /etc.defaults/VERSION
+  tmpfile=/tmp/$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32)
+  echo $(head -n 1 /etc.defaults/VERSION) > $tmpfile
+  source $tmpfile
   echo $majorversion
+  rm -f $tmpfile
 }
 dsmversion=$(getdsmversion)
 
